@@ -1,5 +1,6 @@
 import React from "react";
-import { amountToWordsBDT, formatBDT, formatDisplayDate } from "@/lib/utils";
+import { ScissorsIcon } from "lucide-react";
+import { amountToWordsBDT, cn, formatBDT, formatDisplayDate } from "@/lib/utils";
 
 export interface InvoiceSheetProps {
   receiptNumber: string;
@@ -21,6 +22,29 @@ const BUSINESS_DETAILS = {
   website: "mehrima-skill-development.com",
 };
 
+/** Shared eyebrow label style used across the sheet. */
+const LABEL = "text-[8px] font-semibold uppercase leading-none tracking-[0.14em] text-zinc-500";
+
+const Field: React.FC<{
+  label: string;
+  value: React.ReactNode;
+  className?: string;
+  valueClassName?: string;
+}> = ({ label, value, className, valueClassName }) => (
+  <div className={cn("min-w-0", className)}>
+    <dt className={LABEL}>{label}</dt>
+    <dd className={cn("mt-1.5 wrap-break-word text-[10pt] font-medium leading-snug text-zinc-950", valueClassName)}>
+      {value}
+    </dd>
+  </div>
+);
+
+const SignatureLine: React.FC<{ label: string; className?: string }> = ({ label, className }) => (
+  <div className={cn("border-t border-zinc-950 pt-1.5", className)}>
+    <p className={LABEL}>{label}</p>
+  </div>
+);
+
 export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
   receiptNumber,
   studentName,
@@ -35,155 +59,176 @@ export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
   const numericAmount = Number(amount) || 0;
   const formattedAmount = formatBDT(numericAmount);
   const amountWords = amountToWordsBDT(numericAmount);
-  const displayDate = formatDisplayDate(paymentDate);
+  const displayDate = formatDisplayDate(paymentDate) || "—";
   const displayReceiptNumber = receiptNumber.trim() || "—";
+  const method = paymentMethod || "Cash";
 
   return (
     <div className="a4-sheet font-sans text-zinc-950 print:border-0">
+      {/* ───────────── Customer copy (75%) ───────────── */}
       <section
         aria-label="Customer copy"
-        className="flex h-[75%] w-full flex-col justify-between bg-white px-12 pb-8 pt-10"
+        className="flex h-[75%] w-full flex-col bg-white px-[16mm] pb-[11mm] pt-[13mm]"
       >
-        <div>
-          <header className="flex items-start justify-between gap-8 border-b border-zinc-400 pb-5">
-            <div className="min-w-0 flex-1">
-              <h1 className="font-heading wrap-break-word text-[22px] font-semibold tracking-tight">
-                {BUSINESS_DETAILS.name}
-              </h1>
-              <p className="mt-1 text-xs text-zinc-600">{BUSINESS_DETAILS.address}</p>
-              <p className="mt-1 text-[11px] text-zinc-500">
-                {BUSINESS_DETAILS.contact} · {BUSINESS_DETAILS.email} · {BUSINESS_DETAILS.website}
-              </p>
-            </div>
-            <div className="shrink-0 text-right">
-              <h2 className="text-lg font-semibold uppercase tracking-[0.08em]">
-                Payment Receipt
-              </h2>
-              <p className="mt-2 text-[10px] font-medium uppercase tracking-wider text-zinc-500">
-                Receipt No.
-              </p>
-              <p className="font-mono text-sm font-medium">{displayReceiptNumber}</p>
-            </div>
-          </header>
-
-          <div className="mt-4 grid grid-cols-2 gap-8 border-b border-zinc-200 pb-3">
-            <div>
-              <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">Date</span>
-              <p className="mt-0.5 text-[10pt] font-medium">{displayDate || "—"}</p>
-            </div>
-            <div>
-              <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">Payment method</span>
-              <p className="mt-0.5 text-[10pt] font-medium">{paymentMethod || "Cash"}</p>
-            </div>
-          </div>
-
-          <div className="mt-4 grid grid-cols-3 gap-6 border-b border-zinc-200 pb-3">
-            <div className="min-w-0">
-              <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">Student</span>
-              <p className="mt-0.5 wrap-break-word text-[10pt] font-medium">{studentName || "—"}</p>
-            </div>
-            <div className="min-w-0">
-              <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">Batch</span>
-              <p className="mt-0.5 wrap-break-word text-[10pt] font-medium">{studentBatch || "—"}</p>
-            </div>
-            <div className="min-w-0">
-              <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">Subject</span>
-              <p className="mt-0.5 wrap-break-word text-[10pt] font-medium">{subject || "—"}</p>
-            </div>
-          </div>
-
-          <div className="mt-6 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-8 border-b border-zinc-300 pb-7">
-            <div className="min-w-0">
-              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-                Payment received for
-              </h3>
-              <p className="mt-2 whitespace-pre-wrap wrap-break-word text-base leading-relaxed">
-                {description || "—"}
-              </p>
-              {notes && (
-                <p className="mt-3 whitespace-pre-wrap wrap-break-word text-xs leading-relaxed text-zinc-600">
-                  <span className="font-medium text-zinc-700">Note: </span>{notes}
-                </p>
-              )}
-            </div>
-            <div className="min-w-44 text-right">
-              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-                Amount received
-              </h3>
-              <p className="mt-2 font-mono text-xl font-medium tabular-nums">
-                {formattedAmount}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <span className="mr-2 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-              Amount in words
-            </span>
-            <span className="text-xs font-medium text-zinc-800">{amountWords}</span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-16 px-2 text-center">
-          <div className="border-t border-zinc-400 pt-2 text-[11px] text-zinc-600">
-            Payer / Depositor Signature
-          </div>
-          <div className="border-t border-zinc-400 pt-2 text-[11px] text-zinc-600">
-            Authorized Signature
-          </div>
-        </div>
-      </section>
-
-      <div
-        aria-hidden="true"
-        className="relative z-10 flex h-0 w-full items-center justify-center border-t border-dashed border-zinc-400"
-      >
-        <span className="bg-white px-3 text-[9px] uppercase tracking-widest text-zinc-500">
-          Detach — Office Copy
-        </span>
-      </div>
-
-      <section
-        aria-label="Office copy"
-        className="flex h-[25%] w-full flex-col justify-between bg-white px-12 py-5"
-      >
-        <header className="flex items-center justify-between gap-4 border-b border-zinc-300 pb-2">
+        <header className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-10 border-b-2 border-zinc-950 pb-5">
           <div className="min-w-0">
-            <p className="text-[9px] font-semibold uppercase tracking-widest text-zinc-500">
-              Office copy
+            <h1 className="font-heading wrap-break-word text-[24px] font-semibold leading-none tracking-tight">
+              {BUSINESS_DETAILS.name}
+            </h1>
+            <p className="mt-3 max-w-[100mm] text-[9.5px] leading-relaxed text-zinc-600">
+              {BUSINESS_DETAILS.address}
             </p>
-            <p className="font-heading mt-0.5 truncate text-xs font-semibold">{BUSINESS_DETAILS.name}</p>
+            <p className="mt-0.5 flex flex-wrap gap-x-3 text-[9.5px] leading-relaxed text-zinc-600">
+              <span className="whitespace-nowrap">{BUSINESS_DETAILS.contact}</span>
+              <span className="whitespace-nowrap">{BUSINESS_DETAILS.email}</span>
+              <span className="whitespace-nowrap">{BUSINESS_DETAILS.website}</span>
+            </p>
           </div>
-          <div className="shrink-0 text-right text-[10px]">
-            <p><span className="text-zinc-500">Receipt No. </span><span className="font-mono font-medium">{displayReceiptNumber}</span></p>
-            <p className="mt-0.5"><span className="text-zinc-500">Date </span><span className="font-medium">{displayDate || "—"}</span></p>
+
+          <div className="shrink-0 text-right">
+            <h2 className="text-[15px] font-bold uppercase leading-none tracking-[0.16em]">
+              Payment Receipt
+            </h2>
+            <dl className="mt-3.5 grid grid-cols-[auto_auto] items-baseline justify-end gap-x-4 gap-y-1.5">
+              <dt className={LABEL}>Receipt No.</dt>
+              <dd className="font-mono text-[10pt] leading-none">{displayReceiptNumber}</dd>
+              <dt className={LABEL}>Date</dt>
+              <dd className="text-[10pt] font-medium leading-none">{displayDate}</dd>
+            </dl>
           </div>
         </header>
 
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-6 py-3">
-          <div className="min-w-0">
-            <p className="text-[9px] font-semibold uppercase tracking-wider text-zinc-500">Student</p>
-            <p className="mt-0.5 truncate text-[9pt] font-semibold">{studentName || "—"}</p>
-            <p className="mt-0.5 truncate text-[9pt] text-zinc-600">
-              Batch: {studentBatch || "—"} · Subject: {subject || "—"}
-            </p>
-            <p className="mt-2 text-[9px] font-semibold uppercase tracking-wider text-zinc-500">Payment for</p>
-            <p className="mt-0.5 whitespace-pre-wrap wrap-break-word text-[9pt] font-medium leading-snug">
-              {description || "—"}
-            </p>
-            <p className="mt-1 truncate text-[9pt] text-zinc-500">
-              Method: {paymentMethod || "Cash"}{notes ? ` · ${notes}` : ""}
-            </p>
+        {/* Payer details */}
+        <div className="mt-8">
+          <p className={LABEL}>Received from</p>
+          <p className="mt-2 wrap-break-word text-[15pt] font-semibold leading-tight tracking-tight">
+            {studentName || "—"}
+          </p>
+          <dl className="mt-4 grid grid-cols-3 gap-6 border-t border-zinc-200 pt-3.5">
+            <Field label="Batch" value={studentBatch || "—"} />
+            <Field label="Subject" value={subject || "—"} />
+            <Field label="Payment method" value={method} />
+          </dl>
+        </div>
+
+        {/* Line item */}
+        <table className="mt-10 w-full border-collapse text-left">
+          <thead>
+            <tr className="border-b border-zinc-950">
+              <th scope="col" className={cn(LABEL, "pb-2 font-semibold text-zinc-700")}>
+                Description
+              </th>
+              <th scope="col" className={cn(LABEL, "w-[48mm] pb-2 text-right font-semibold text-zinc-700")}>
+                Amount
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="border-b border-zinc-200 align-top">
+              <td className="py-4 pr-8">
+                <p className="whitespace-pre-wrap wrap-break-word text-[10.5pt] leading-relaxed">
+                  {description || "—"}
+                </p>
+              </td>
+              <td className="py-4 text-right font-mono text-[10.5pt] tabular-nums">{formattedAmount}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr className="bg-zinc-100">
+              <td className="px-3 py-3 align-middle">
+                <p className={LABEL}>Amount in words</p>
+                <p className="mt-1.5 text-[9.5pt] font-medium leading-snug text-zinc-800">{amountWords}</p>
+              </td>
+              <td className="border-l-2 border-zinc-950 px-3 py-3 text-right align-middle">
+                <p className={LABEL}>Total received</p>
+                <p className="mt-1.5 font-mono text-[15pt] leading-none tabular-nums">{formattedAmount}</p>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+
+        {notes && (
+          <div className="mt-5 grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-3">
+            <p className={LABEL}>Note</p>
+            <p className="whitespace-pre-wrap wrap-break-word text-[9pt] leading-relaxed text-zinc-700">{notes}</p>
           </div>
-          <div className="border-l border-zinc-200 pl-6 text-right">
-            <p className="text-[9px] font-semibold uppercase tracking-wider text-zinc-500">Amount received</p>
-            <p className="mt-1 font-mono text-sm font-medium tabular-nums">{formattedAmount}</p>
+        )}
+
+        {/* Signatures pinned to the bottom of the customer copy */}
+        <div className="mt-auto grid grid-cols-2 gap-[28mm] pt-10">
+          <SignatureLine label="Payer / Depositor signature" />
+          <SignatureLine label="Authorized signature" className="text-right" />
+        </div>
+      </section>
+
+      {/* ───────────── Detach line ───────────── */}
+      <div
+        aria-hidden="true"
+        className="relative z-10 flex h-0 w-full items-center border-t border-dashed border-zinc-400"
+      >
+        <span className="absolute left-[9mm] flex items-center bg-white px-1 text-zinc-400">
+          <ScissorsIcon className="size-3 -rotate-90" strokeWidth={1.75} />
+        </span>
+        <span className="absolute left-1/2 -translate-x-1/2 bg-white px-3 text-[7.5px] font-medium uppercase tracking-[0.2em] text-zinc-400">
+          Detach here · Office copy
+        </span>
+      </div>
+
+      {/* ───────────── Office copy (25%) ───────────── */}
+      <section
+        aria-label="Office copy"
+        className="flex h-[25%] w-full flex-col bg-white px-[16mm] pb-[7mm] pt-[7mm]"
+      >
+        <header className="flex items-end justify-between gap-6 border-b border-zinc-950 pb-2">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <p className="font-heading truncate text-[13px] font-semibold leading-none">{BUSINESS_DETAILS.name}</p>
+            <span className="shrink-0 rounded-[2px] border border-zinc-950 px-1.5 py-[3px] text-[7px] font-bold uppercase leading-none tracking-[0.16em]">
+              Office copy
+            </span>
+          </div>
+          <dl className="flex shrink-0 items-baseline gap-5 text-[8.5pt] leading-none">
+            <div className="flex items-baseline gap-2">
+              <dt className={LABEL}>Receipt No.</dt>
+              <dd className="font-mono">{displayReceiptNumber}</dd>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <dt className={LABEL}>Date</dt>
+              <dd className="font-medium">{displayDate}</dd>
+            </div>
+          </dl>
+        </header>
+
+        <div className="mt-3.5 grid grid-cols-[minmax(0,1fr)_52mm] items-stretch gap-6">
+          <dl className="grid grid-cols-[1.5fr_1fr_1fr] content-start gap-x-5 gap-y-3">
+            <Field label="Student" value={studentName || "—"} valueClassName="truncate text-[9pt] font-semibold" />
+            <Field label="Batch" value={studentBatch || "—"} valueClassName="truncate text-[9pt]" />
+            <Field label="Subject" value={subject || "—"} valueClassName="truncate text-[9pt]" />
+            <Field
+              label="Payment for"
+              className="col-span-2"
+              value={
+                <>
+                  <span className="line-clamp-2 whitespace-pre-wrap">{description || "—"}</span>
+                  {notes && (
+                    <span className="mt-0.5 block truncate text-[8pt] text-zinc-500">Note: {notes}</span>
+                  )}
+                </>
+              }
+              valueClassName="text-[9pt] font-normal"
+            />
+            <Field label="Method" value={method} valueClassName="truncate text-[9pt]" />
+          </dl>
+
+          <div className="flex flex-col justify-center border-l-2 border-zinc-950 bg-zinc-100 px-3 py-2.5 text-right">
+            <p className={LABEL}>Amount received</p>
+            <p className="mt-1.5 font-mono text-[13pt] leading-none tabular-nums">{formattedAmount}</p>
+            <p className="mt-1.5 line-clamp-2 text-[8px] leading-snug text-zinc-600">{amountWords}</p>
           </div>
         </div>
 
-        <footer className="flex items-center justify-between border-t border-zinc-300 pt-2 text-[9px] text-zinc-500">
-          <span>Received by: ____________________</span>
-          <span>Verified by: ____________________</span>
+        <footer className="mt-auto grid grid-cols-2 gap-[28mm]">
+          <SignatureLine label="Received by" />
+          <SignatureLine label="Verified by" className="text-right" />
         </footer>
       </section>
     </div>
