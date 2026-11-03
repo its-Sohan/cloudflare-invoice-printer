@@ -18,6 +18,9 @@ export function App() {
   const formRef = useRef<HTMLFormElement | null>(null);
 
   const [receiptNumber, setReceiptNumber] = useState("");
+  const [studentName, setStudentName] = useState("");
+  const [studentBatch, setStudentBatch] = useState("");
+  const [subject, setSubject] = useState("");
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [paymentDate, setPaymentDate] = useState(getToday);
@@ -44,6 +47,9 @@ export function App() {
 
   const handleClear = () => {
     setReceiptNumber("");
+    setStudentName("");
+    setStudentBatch("");
+    setSubject("");
     setDescription("");
     setAmount("");
     setPaymentDate(getToday());
@@ -92,6 +98,35 @@ export function App() {
                       placeholder="Enter a receipt number"
                     />
                   </label>
+                  <label className="block space-y-1.5">
+                    <span className="text-xs font-medium text-zinc-700">Student's name</span>
+                    <Input
+                      value={studentName}
+                      onChange={(event) => setStudentName(event.target.value)}
+                      placeholder="Enter the student's name"
+                      required
+                    />
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <label className="block space-y-1.5">
+                      <span className="text-xs font-medium text-zinc-700">Student's batch</span>
+                      <Input
+                        value={studentBatch}
+                        onChange={(event) => setStudentBatch(event.target.value)}
+                        placeholder="Enter batch"
+                        required
+                      />
+                    </label>
+                    <label className="block space-y-1.5">
+                      <span className="text-xs font-medium text-zinc-700">Subject</span>
+                      <Input
+                        value={subject}
+                        onChange={(event) => setSubject(event.target.value)}
+                        placeholder="Enter subject"
+                        required
+                      />
+                    </label>
+                  </div>
                   <div className="grid grid-cols-2 gap-3">
                     <label className="block space-y-1.5">
                       <span className="text-xs font-medium text-zinc-700">Date</span>
@@ -172,6 +207,9 @@ export function App() {
           <div className="print-scale-reset flex min-w-max justify-center">
             <InvoiceSheet
               receiptNumber={receiptNumber}
+              studentName={studentName}
+              studentBatch={studentBatch}
+              subject={subject}
               description={description}
               amount={amount}
               paymentDate={paymentDate}

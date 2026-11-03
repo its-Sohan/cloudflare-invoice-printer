@@ -3,6 +3,9 @@ import { amountToWordsBDT, formatBDT, formatDisplayDate } from "@/lib/utils";
 
 export interface InvoiceSheetProps {
   receiptNumber: string;
+  studentName: string;
+  studentBatch: string;
+  subject: string;
   description: string;
   amount: number | string;
   paymentDate: string;
@@ -20,6 +23,9 @@ const BUSINESS_DETAILS = {
 
 export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
   receiptNumber,
+  studentName,
+  studentBatch,
+  subject,
   description,
   amount,
   paymentDate,
@@ -41,7 +47,7 @@ export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
         <div>
           <header className="flex items-start justify-between gap-8 border-b border-zinc-400 pb-5">
             <div className="min-w-0 flex-1">
-              <h1 className="wrap-break-word text-[22px] font-semibold tracking-tight">
+              <h1 className="font-heading wrap-break-word text-[22px] font-semibold tracking-tight">
                 {BUSINESS_DETAILS.name}
               </h1>
               <p className="mt-1 text-xs text-zinc-600">{BUSINESS_DETAILS.address}</p>
@@ -56,22 +62,37 @@ export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
               <p className="mt-2 text-[10px] font-medium uppercase tracking-wider text-zinc-500">
                 Receipt No.
               </p>
-              <p className="font-mono text-sm font-semibold">{displayReceiptNumber}</p>
+              <p className="font-mono text-sm font-medium">{displayReceiptNumber}</p>
             </div>
           </header>
 
           <div className="mt-4 grid grid-cols-2 gap-8 border-b border-zinc-200 pb-3">
             <div>
               <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">Date</span>
-              <p className="mt-0.5 text-sm font-medium">{displayDate || "—"}</p>
+              <p className="mt-0.5 text-[10pt] font-medium">{displayDate || "—"}</p>
             </div>
             <div>
               <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">Payment method</span>
-              <p className="mt-0.5 text-sm font-medium">{paymentMethod || "Cash"}</p>
+              <p className="mt-0.5 text-[10pt] font-medium">{paymentMethod || "Cash"}</p>
             </div>
           </div>
 
-          <div className="mt-10 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-8 border-b border-zinc-300 pb-7">
+          <div className="mt-4 grid grid-cols-3 gap-6 border-b border-zinc-200 pb-3">
+            <div className="min-w-0">
+              <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">Student</span>
+              <p className="mt-0.5 wrap-break-word text-[10pt] font-medium">{studentName || "—"}</p>
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">Batch</span>
+              <p className="mt-0.5 wrap-break-word text-[10pt] font-medium">{studentBatch || "—"}</p>
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">Subject</span>
+              <p className="mt-0.5 wrap-break-word text-[10pt] font-medium">{subject || "—"}</p>
+            </div>
+          </div>
+
+          <div className="mt-6 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-8 border-b border-zinc-300 pb-7">
             <div className="min-w-0">
               <h3 className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
                 Payment received for
@@ -89,7 +110,7 @@ export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
               <h3 className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
                 Amount received
               </h3>
-              <p className="mt-2 font-mono text-xl font-semibold tabular-nums">
+              <p className="mt-2 font-mono text-xl font-medium tabular-nums">
                 {formattedAmount}
               </p>
             </div>
@@ -117,7 +138,7 @@ export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
         aria-hidden="true"
         className="relative z-10 flex h-0 w-full items-center justify-center border-t border-dashed border-zinc-400"
       >
-        <span className="bg-white px-3 font-mono text-[9px] uppercase tracking-widest text-zinc-500">
+        <span className="bg-white px-3 text-[9px] uppercase tracking-widest text-zinc-500">
           Detach — Office Copy
         </span>
       </div>
@@ -131,27 +152,32 @@ export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
             <p className="text-[9px] font-semibold uppercase tracking-widest text-zinc-500">
               Office copy
             </p>
-            <p className="mt-0.5 truncate text-xs font-semibold">{BUSINESS_DETAILS.name}</p>
+            <p className="font-heading mt-0.5 truncate text-xs font-semibold">{BUSINESS_DETAILS.name}</p>
           </div>
           <div className="shrink-0 text-right text-[10px]">
-            <p><span className="text-zinc-500">Receipt No. </span><span className="font-mono font-semibold">{displayReceiptNumber}</span></p>
+            <p><span className="text-zinc-500">Receipt No. </span><span className="font-mono font-medium">{displayReceiptNumber}</span></p>
             <p className="mt-0.5"><span className="text-zinc-500">Date </span><span className="font-medium">{displayDate || "—"}</span></p>
           </div>
         </header>
 
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-6 py-3">
           <div className="min-w-0">
-            <p className="text-[9px] font-semibold uppercase tracking-wider text-zinc-500">Payment for</p>
-            <p className="mt-1 whitespace-pre-wrap wrap-break-word text-xs font-medium leading-snug">
+            <p className="text-[9px] font-semibold uppercase tracking-wider text-zinc-500">Student</p>
+            <p className="mt-0.5 truncate text-[9pt] font-semibold">{studentName || "—"}</p>
+            <p className="mt-0.5 truncate text-[9pt] text-zinc-600">
+              Batch: {studentBatch || "—"} · Subject: {subject || "—"}
+            </p>
+            <p className="mt-2 text-[9px] font-semibold uppercase tracking-wider text-zinc-500">Payment for</p>
+            <p className="mt-0.5 whitespace-pre-wrap wrap-break-word text-[9pt] font-medium leading-snug">
               {description || "—"}
             </p>
-            <p className="mt-1 truncate text-[10px] text-zinc-500">
+            <p className="mt-1 truncate text-[9pt] text-zinc-500">
               Method: {paymentMethod || "Cash"}{notes ? ` · ${notes}` : ""}
             </p>
           </div>
           <div className="border-l border-zinc-200 pl-6 text-right">
             <p className="text-[9px] font-semibold uppercase tracking-wider text-zinc-500">Amount received</p>
-            <p className="mt-1 font-mono text-sm font-semibold tabular-nums">{formattedAmount}</p>
+            <p className="mt-1 font-mono text-sm font-medium tabular-nums">{formattedAmount}</p>
           </div>
         </div>
 
