@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import { FilePlus2Icon, PrinterIcon } from "lucide-react";
+import { FilePlus2Icon, PlusIcon, PrinterIcon, XIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { InvoiceSheet } from "@/components/InvoiceSheet";
+import { InvoiceSheet, type InvoiceLineItem } from "@/components/InvoiceSheet";
 
 const PAYMENT_METHODS = ["Cash", "bKash", "Nagad", "Bank Transfer", "Card"];
 
@@ -21,8 +21,7 @@ export function App() {
   const [studentName, setStudentName] = useState("");
   const [studentBatch, setStudentBatch] = useState("");
   const [subject, setSubject] = useState("");
-  const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState("");
+  const [items, setItems] = useState<InvoiceLineItem[]>([{ description: "", amount: "" }]);
   const [paymentDate, setPaymentDate] = useState(getToday);
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [notes, setNotes] = useState("");
@@ -45,13 +44,24 @@ export function App() {
     return () => window.removeEventListener("keydown", handleShortcut);
   }, []);
 
+  const handleItemChange = (index: number, field: keyof InvoiceLineItem, value: string) => {
+    setItems((prev) => prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)));
+  };
+
+  const handleAddItem = () => {
+    setItems((prev) => [...prev, { description: "", amount: "" }]);
+  };
+
+  const handleRemoveItem = (index: number) => {
+    setItems((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== index) : prev));
+  };
+
   const handleClear = () => {
     setReceiptNumber("");
     setStudentName("");
     setStudentBatch("");
     setSubject("");
-    setDescription("");
-    setAmount("");
+    setItems([{ description: "", amount: "" }]);
     setPaymentDate(getToday());
     setPaymentMethod("Cash");
     setNotes("");
@@ -150,28 +160,68 @@ export function App() {
                       </select>
                     </label>
                   </div>
-                  <label className="block space-y-1.5">
-                    <span className="text-xs font-medium text-zinc-700">Description</span>
-                    <Textarea
-                      value={description}
-                      onChange={(event) => setDescription(event.target.value)}
-                      placeholder="What is this payment for?"
-                      className="min-h-20 resize-y"
-                      required
-                    />
-                  </label>
-                  <label className="block space-y-1.5">
-                    <span className="text-xs font-medium text-zinc-700">Amount (BDT)</span>
-                    <Input
-                      type="number"
-                      min="0.01"
-                      step="0.01"
-                      value={amount}
-                      onChange={(event) => setAmount(event.target.value)}
-                      placeholder="0.00"
-                      required
-                    />
-                  </label>
+                  <div className="space-y-3">
+                    {items.map((item, index) => (
+                      <div
+                        key={index}
+                        className={
+                          items.length > 1
+                            ? "space-y-2.5 rounded-lg border border-zinc-200 bg-zinc-50/70 p-3"
+                            : "space-y-3"
+                        }
+                      >
+                        {items.length > 1 && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                              Item {index + 1}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveItem(index)}
+                              className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium text-zinc-500 hover:bg-zinc-200/70 hover:text-zinc-900"
+                              aria-label={`Remove item ${index + 1}`}
+                            >
+                              <XIcon className="size-3.5" />
+                              Remove
+                            </button>
+                          </div>
+                        )}
+                        <label className="block space-y-1.5">
+                          <span className="text-xs font-medium text-zinc-700">Description</span>
+                          <Textarea
+                            value={item.description}
+                            onChange={(event) => handleItemChange(index, "description", event.target.value)}
+                            placeholder="What is this payment for?"
+                            className="min-h-16 resize-y bg-white"
+                            required
+                          />
+                        </label>
+                        <label className="block space-y-1.5">
+                          <span className="text-xs font-medium text-zinc-700">Amount (৳)</span>
+                          <Input
+                            type="number"
+                            min="0.01"
+                            step="0.01"
+                            value={item.amount}
+                            onChange={(event) => handleItemChange(index, "amount", event.target.value)}
+                            placeholder="0.00"
+                            className="bg-white"
+                            required
+                          />
+                        </label>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleAddItem}
+                      className="w-full border-dashed text-zinc-600 hover:text-zinc-950"
+                    >
+                      <PlusIcon data-icon="inline-start" />
+                      Add another item
+                    </Button>
+                  </div>
                   <label className="block space-y-1.5">
                     <span className="text-xs font-medium text-zinc-700">Notes <span className="font-normal text-zinc-400">(optional)</span></span>
                     <Textarea
@@ -196,9 +246,6 @@ export function App() {
                   Clear
                 </Button>
               </div>
-              <p className="text-center text-[11px] leading-relaxed text-zinc-500">
-                Nothing is saved or uploaded. Use Ctrl+P or Cmd+P to print.
-              </p>
             </div>
           </form>
         </aside>
@@ -210,8 +257,7 @@ export function App() {
               studentName={studentName}
               studentBatch={studentBatch}
               subject={subject}
-              description={description}
-              amount={amount}
+              items={items}
               paymentDate={paymentDate}
               paymentMethod={paymentMethod}
               notes={notes}

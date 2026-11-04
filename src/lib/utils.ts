@@ -7,8 +7,8 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatBDT(amount: number | string): string {
   const num = typeof amount === "string" ? parseFloat(amount) : amount;
-  if (!Number.isFinite(num)) return "BDT 0";
-  return `BDT ${num.toLocaleString("en-IN", {
+  if (!Number.isFinite(num)) return "৳ 0";
+  return `৳ ${num.toLocaleString("en-IN", {
     minimumFractionDigits: num % 1 === 0 ? 0 : 2,
     maximumFractionDigits: 2,
   })}`;

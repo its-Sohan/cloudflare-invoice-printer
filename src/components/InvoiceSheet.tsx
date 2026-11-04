@@ -2,13 +2,17 @@ import React from "react";
 import { ScissorsIcon } from "lucide-react";
 import { amountToWordsBDT, cn, formatBDT, formatDisplayDate } from "@/lib/utils";
 
+export interface InvoiceLineItem {
+  description: string;
+  amount: number | string;
+}
+
 export interface InvoiceSheetProps {
   receiptNumber: string;
   studentName: string;
   studentBatch: string;
   subject: string;
-  description: string;
-  amount: number | string;
+  items: InvoiceLineItem[];
   paymentDate: string;
   paymentMethod: string;
   notes: string;
@@ -50,18 +54,23 @@ export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
   studentName,
   studentBatch,
   subject,
-  description,
-  amount,
+  items,
   paymentDate,
   paymentMethod,
   notes,
 }) => {
-  const numericAmount = Number(amount) || 0;
-  const formattedAmount = formatBDT(numericAmount);
-  const amountWords = amountToWordsBDT(numericAmount);
+  const safeItems = items.length > 0 ? items : [{ description: "", amount: 0 }];
+  const totalAmount = safeItems.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+  const formattedTotal = formatBDT(totalAmount);
+  const amountWords = amountToWordsBDT(totalAmount);
   const displayDate = formatDisplayDate(paymentDate) || "—";
   const displayReceiptNumber = receiptNumber.trim() || "—";
   const method = paymentMethod || "Cash";
+  const officeSummary =
+    safeItems
+      .map((item) => item.description.trim())
+      .filter(Boolean)
+      .join("\n") || "—";
 
   return (
     <div className="a4-sheet font-sans text-zinc-950 print:border-0">
@@ -86,10 +95,7 @@ export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
           </div>
 
           <div className="shrink-0 text-right">
-            <h2 className="text-[15px] font-bold uppercase leading-none tracking-[0.16em]">
-              Payment Receipt
-            </h2>
-            <dl className="mt-3.5 grid grid-cols-[auto_auto] items-baseline justify-end gap-x-4 gap-y-1.5">
+            <dl className="grid grid-cols-[auto_auto] items-baseline justify-end gap-x-4 gap-y-1.5">
               <dt className={LABEL}>Receipt No.</dt>
               <dd className="font-mono text-[10pt] leading-none">{displayReceiptNumber}</dd>
               <dt className={LABEL}>Date</dt>
@@ -98,8 +104,12 @@ export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
           </div>
         </header>
 
+        <h2 className="mt-6 text-center text-[20px] font-extrabold uppercase leading-none tracking-[0.16em]">
+          Payment Receipt
+        </h2>
+
         {/* Payer details */}
-        <div className="mt-8">
+        <div className="mt-6">
           <p className={LABEL}>Received from</p>
           <p className="mt-2 wrap-break-word text-[15pt] font-semibold leading-tight tracking-tight">
             {studentName || "—"}
@@ -124,14 +134,18 @@ export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
             </tr>
           </thead>
           <tbody>
-            <tr className="border-b border-zinc-200 align-top">
-              <td className="py-4 pr-8">
-                <p className="whitespace-pre-wrap wrap-break-word text-[10.5pt] leading-relaxed">
-                  {description || "—"}
-                </p>
-              </td>
-              <td className="py-4 text-right font-mono text-[10.5pt] tabular-nums">{formattedAmount}</td>
-            </tr>
+            {safeItems.map((item, index) => (
+              <tr key={index} className="border-b border-zinc-200 align-top">
+                <td className="py-3.5 pr-8">
+                  <p className="whitespace-pre-wrap wrap-break-word text-[10.5pt] leading-relaxed">
+                    {item.description.trim() || "—"}
+                  </p>
+                </td>
+                <td className="py-3.5 text-right font-mono text-[10.5pt] tabular-nums">
+                  {formatBDT(Number(item.amount) || 0)}
+                </td>
+              </tr>
+            ))}
           </tbody>
           <tfoot>
             <tr className="bg-zinc-100">
@@ -141,7 +155,7 @@ export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
               </td>
               <td className="border-l-2 border-zinc-950 px-3 py-3 text-right align-middle">
                 <p className={LABEL}>Total received</p>
-                <p className="mt-1.5 font-mono text-[15pt] leading-none tabular-nums">{formattedAmount}</p>
+                <p className="mt-1.5 font-mono text-[15pt] leading-none tabular-nums">{formattedTotal}</p>
               </td>
             </tr>
           </tfoot>
@@ -156,8 +170,8 @@ export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
 
         {/* Signatures pinned to the bottom of the customer copy */}
         <div className="mt-auto grid grid-cols-2 gap-[28mm] pt-10">
-          <SignatureLine label="Payer / Depositor signature" />
-          <SignatureLine label="Authorized signature" className="text-right" />
+          <SignatureLine label="Payer / Depositor signature" className="text-center" />
+          <SignatureLine label="Authorized signature" className="text-center" />
         </div>
       </section>
 
@@ -179,20 +193,20 @@ export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
         aria-label="Office copy"
         className="flex h-[25%] w-full flex-col bg-white px-[16mm] pb-[7mm] pt-[7mm]"
       >
-        <header className="flex items-end justify-between gap-6 border-b border-zinc-950 pb-2">
-          <div className="flex min-w-0 items-center gap-2.5">
-            <p className="font-heading truncate text-[13px] font-semibold leading-none">{BUSINESS_DETAILS.name}</p>
-            <span className="shrink-0 rounded-[2px] border border-zinc-950 px-1.5 py-[3px] text-[7px] font-bold uppercase leading-none tracking-[0.16em]">
-              Office copy
-            </span>
+        <header className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-6 border-b border-zinc-950 pb-2">
+          <div className="flex min-w-0 items-center">
+            <p className="font-heading truncate text-[14.3px] font-semibold leading-none">{BUSINESS_DETAILS.name}</p>
           </div>
-          <dl className="flex shrink-0 items-baseline gap-5 text-[8.5pt] leading-none">
+          <span className="shrink-0 rounded-[2.3px] border border-zinc-950 px-[6.9px] py-[3.45px] text-[8.855px] font-bold uppercase leading-none tracking-[0.16em]">
+            Office copy
+          </span>
+          <dl className="flex shrink-0 items-baseline justify-self-end gap-5 text-[9.35pt] leading-none">
             <div className="flex items-baseline gap-2">
-              <dt className={LABEL}>Receipt No.</dt>
+              <dt className={`${LABEL} text-[8.8px]`}>Receipt No.</dt>
               <dd className="font-mono">{displayReceiptNumber}</dd>
             </div>
             <div className="flex items-baseline gap-2">
-              <dt className={LABEL}>Date</dt>
+              <dt className={`${LABEL} text-[8.8px]`}>Date</dt>
               <dd className="font-medium">{displayDate}</dd>
             </div>
           </dl>
@@ -208,7 +222,7 @@ export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
               className="col-span-2"
               value={
                 <>
-                  <span className="line-clamp-2 whitespace-pre-wrap">{description || "—"}</span>
+                  <span className="whitespace-pre-wrap">{officeSummary}</span>
                   {notes && (
                     <span className="mt-0.5 block truncate text-[8pt] text-zinc-500">Note: {notes}</span>
                   )}
@@ -221,14 +235,14 @@ export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
 
           <div className="flex flex-col justify-center border-l-2 border-zinc-950 bg-zinc-100 px-3 py-2.5 text-right">
             <p className={LABEL}>Amount received</p>
-            <p className="mt-1.5 font-mono text-[13pt] leading-none tabular-nums">{formattedAmount}</p>
+            <p className="mt-1.5 font-mono text-[13pt] leading-none tabular-nums">{formattedTotal}</p>
             <p className="mt-1.5 line-clamp-2 text-[8px] leading-snug text-zinc-600">{amountWords}</p>
           </div>
         </div>
 
         <footer className="mt-auto grid grid-cols-2 gap-[28mm]">
-          <SignatureLine label="Received by" />
-          <SignatureLine label="Verified by" className="text-right" />
+          <SignatureLine label="Received by" className="text-center" />
+          <SignatureLine label="Verified by" className="text-center" />
         </footer>
       </section>
     </div>
