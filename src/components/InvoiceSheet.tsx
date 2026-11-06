@@ -1,5 +1,6 @@
 import React from "react";
 import { ScissorsIcon } from "lucide-react";
+import defaultLogo from "@/assets/logo.png";
 import { amountToWordsBDT, cn, formatBDT, formatDisplayDate } from "@/lib/utils";
 
 export interface InvoiceLineItem {
@@ -16,6 +17,7 @@ export interface InvoiceSheetProps {
   paymentDate: string;
   paymentMethod: string;
   notes: string;
+  logoUrl?: string;
 }
 
 const BUSINESS_DETAILS = {
@@ -58,7 +60,9 @@ export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
   paymentDate,
   paymentMethod,
   notes,
+  logoUrl,
 }) => {
+  const resolvedLogo = logoUrl || defaultLogo;
   const safeItems = items.length > 0 ? items : [{ description: "", amount: 0 }];
   const totalAmount = safeItems.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
   const formattedTotal = formatBDT(totalAmount);
@@ -77,13 +81,32 @@ export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
       {/* ───────────── Customer copy (75%) ───────────── */}
       <section
         aria-label="Customer copy"
-        className="flex h-[75%] w-full flex-col bg-white px-[16mm] pb-[11mm] pt-[13mm]"
+        className="relative flex h-[75%] w-full flex-col overflow-hidden bg-white px-[16mm] pb-[11mm] pt-[13mm]"
       >
-        <header className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-10 border-b-2 border-zinc-950 pb-5">
+        {/* Background Watermark */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 flex items-center justify-center select-none"
+        >
+          <img
+            src={resolvedLogo}
+            alt=""
+            className="w-[75mm] max-w-[55%] object-contain opacity-25"
+          />
+        </div>
+
+        <header className="relative z-10 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-10 border-b-2 border-zinc-950 pb-5">
           <div className="min-w-0">
-            <h1 className="font-heading wrap-break-word text-[24px] font-semibold leading-none tracking-tight">
-              {BUSINESS_DETAILS.name}
-            </h1>
+            <div className="flex items-center gap-3">
+              <img
+                src={resolvedLogo}
+                alt={BUSINESS_DETAILS.name}
+                className="size-10 shrink-0 object-contain"
+              />
+              <h1 className="font-heading wrap-break-word text-[24px] font-semibold leading-none tracking-tight">
+                {BUSINESS_DETAILS.name}
+              </h1>
+            </div>
             <p className="mt-3 max-w-[100mm] text-[9.5px] leading-relaxed text-zinc-600">
               {BUSINESS_DETAILS.address}
             </p>
@@ -104,12 +127,12 @@ export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
           </div>
         </header>
 
-        <h2 className="mt-6 text-center text-[20px] font-extrabold uppercase leading-none tracking-[0.16em]">
+        <h2 className="relative z-10 mt-6 text-center text-[20px] font-extrabold uppercase leading-none tracking-[0.16em]">
           Payment Receipt
         </h2>
 
         {/* Payer details */}
-        <div className="mt-6">
+        <div className="relative z-10 mt-6">
           <p className={LABEL}>Received from</p>
           <p className="mt-2 wrap-break-word text-[15pt] font-semibold leading-tight tracking-tight">
             {studentName || "—"}
@@ -122,7 +145,7 @@ export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
         </div>
 
         {/* Line item */}
-        <table className="mt-10 w-full border-collapse text-left">
+        <table className="relative z-10 mt-10 w-full border-collapse text-left">
           <thead>
             <tr className="border-b border-zinc-950">
               <th scope="col" className={cn(LABEL, "pb-2 font-semibold text-zinc-700")}>
@@ -162,14 +185,14 @@ export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
         </table>
 
         {notes && (
-          <div className="mt-5 grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-3">
+          <div className="relative z-10 mt-5 grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-3">
             <p className={LABEL}>Note</p>
             <p className="whitespace-pre-wrap wrap-break-word text-[9pt] leading-relaxed text-zinc-700">{notes}</p>
           </div>
         )}
 
         {/* Signatures pinned to the bottom of the customer copy */}
-        <div className="mt-auto grid grid-cols-2 gap-[28mm] pt-10">
+        <div className="relative z-10 mt-auto grid grid-cols-2 gap-[28mm] pt-10">
           <SignatureLine label="Payer / Depositor signature" className="text-center" />
           <SignatureLine label="Authorized signature" className="text-center" />
         </div>
@@ -194,7 +217,12 @@ export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({
         className="flex h-[25%] w-full flex-col bg-white px-[16mm] pb-[7mm] pt-[7mm]"
       >
         <header className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-6 border-b border-zinc-950 pb-2">
-          <div className="flex min-w-0 items-center">
+          <div className="flex min-w-0 items-center gap-2">
+            <img
+              src={resolvedLogo}
+              alt={BUSINESS_DETAILS.name}
+              className="size-5 shrink-0 object-contain"
+            />
             <p className="font-heading truncate text-[14.3px] font-semibold leading-none">{BUSINESS_DETAILS.name}</p>
           </div>
           <span className="shrink-0 rounded-[2.3px] border border-zinc-950 px-[6.9px] py-[3.45px] text-[8.855px] font-bold uppercase leading-none tracking-[0.16em]">
